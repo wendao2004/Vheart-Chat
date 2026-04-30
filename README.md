@@ -130,7 +130,7 @@ Deploy cloud functions to uniCloud before running the app:
 
 | Chat | Contacts | Discover | Profile |
 |------|----------|----------|---------|
-| ![Chat]() | ![Contacts]() | ![Discover]() | ![Profile]() |
+| ![Chat](./static/Chat.png) | ![Contacts](./static/Contacts.png) | ![Discover](./static/Discover.png) | ![Profile](./static/Profile.png) |
 
 ## Contributing
 

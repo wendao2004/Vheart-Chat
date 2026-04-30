@@ -128,7 +128,7 @@ npm run build:h5
 
 | 微信 | 联系人 | 发现 | 我的 |
 |------|--------|------|------|
-| ![微信]() | ![联系人]() | ![发现]() | ![我的]() |
+| ![微信](./static/Chat.png) | ![联系人](./static/Contacts.png) | ![发现](./static/Discover.png) | ![我的](./static/Profile.png) |
 
 ## 贡献代码
 
