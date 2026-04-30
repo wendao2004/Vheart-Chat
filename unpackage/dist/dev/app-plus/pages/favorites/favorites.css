@@ -1,0 +1,152 @@
+
+.favorites-container[data-v-da3e0273] {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	background-color: #EDEDED;
+}
+
+/* 自定义导航栏 */
+.custom-navbar[data-v-da3e0273] {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 999;
+	background-color: #EDEDED;
+}
+.navbar-content[data-v-da3e0273] {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	height: 44px;
+	padding: 0 12px;
+}
+.navbar-left[data-v-da3e0273],
+.navbar-right[data-v-da3e0273] {
+	width: 40px;
+	height: 44px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.back-icon[data-v-da3e0273] {
+	font-size: 24px;
+	color: #000000;
+}
+.navbar-title[data-v-da3e0273] {
+	font-size: 17px;
+	font-weight: 600;
+	color: #000000;
+	flex: 1;
+	text-align: center;
+}
+
+/* 导航栏占位 */
+.navbar-placeholder[data-v-da3e0273] {
+	background-color: #EDEDED;
+}
+
+/* 收藏列表 */
+.favorites-list[data-v-da3e0273] {
+	flex: 1;
+	background-color: #EDEDED;
+}
+.loading[data-v-da3e0273] {
+	padding: 20px;
+	text-align: center;
+	color: #999999;
+	background-color: #FFFFFF;
+}
+.empty[data-v-da3e0273] {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	padding: 80px 20px;
+	background-color: #FFFFFF;
+}
+.empty-text[data-v-da3e0273] {
+	font-size: 16px;
+	color: #999999;
+}
+.empty-tip[data-v-da3e0273] {
+	margin-top: 10px;
+	font-size: 12px;
+	color: #CCCCCC;
+}
+.favorites-content[data-v-da3e0273] {
+	background-color: #EDEDED;
+	padding: 12px;
+}
+.favorite-card[data-v-da3e0273] {
+	background-color: #FFFFFF;
+	border-radius: 8px;
+	padding: 16px;
+	margin-bottom: 12px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.card-header[data-v-da3e0273] {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 12px;
+}
+.user-info[data-v-da3e0273] {
+	display: flex;
+	align-items: center;
+}
+.user-avatar[data-v-da3e0273] {
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	overflow: hidden;
+	margin-right: 8px;
+}
+.user-avatar uni-image[data-v-da3e0273] {
+	width: 100%;
+	height: 100%;
+}
+.user-name[data-v-da3e0273] {
+	font-size: 14px;
+	font-weight: 500;
+	color: #333333;
+}
+.favorite-time[data-v-da3e0273] {
+	font-size: 12px;
+	color: #999999;
+}
+.card-content[data-v-da3e0273] {
+	margin-bottom: 12px;
+	padding: 12px;
+	background-color: #F5F5F5;
+	border-radius: 6px;
+}
+.message-content[data-v-da3e0273] {
+	font-size: 15px;
+	color: #333333;
+	line-height: 1.4;
+	word-break: break-word;
+	margin-bottom: 8px;
+	display: block;
+}
+.message-time[data-v-da3e0273] {
+	font-size: 11px;
+	color: #999999;
+	display: block;
+	text-align: right;
+}
+.card-footer[data-v-da3e0273] {
+	display: flex;
+	justify-content: flex-end;
+}
+.action-button[data-v-da3e0273] {
+	padding: 6px 12px;
+	background-color: #FF3B30;
+	border-radius: 4px;
+}
+.delete-text[data-v-da3e0273] {
+	font-size: 14px;
+	color: #FFFFFF;
+}

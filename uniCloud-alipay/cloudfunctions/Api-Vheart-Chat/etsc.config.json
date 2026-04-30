@@ -1,0 +1,12 @@
+module.exports = {
+	outDir: "./dist",
+	esbuild: {
+		minify: false,
+		target: "es2017",
+		platform: "node",
+		format: "cjs"
+	},
+	include: ["src/**/*.ts"],
+	exclude: ["../common/**/*"],
+	preserveModules: false
+};

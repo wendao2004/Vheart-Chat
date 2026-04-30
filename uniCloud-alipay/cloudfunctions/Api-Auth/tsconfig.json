@@ -1,0 +1,14 @@
+{
+	"compilerOptions": {
+		"module": "CommonJS",
+		"target": "ES2017",
+		"strict": false,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"baseUrl": ".",
+		"paths": {
+			"common/*": ["../common/*"]
+		}
+	},
+	"include": ["src/**/*", "../common/**/*"]
+}
