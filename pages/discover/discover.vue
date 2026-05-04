@@ -61,6 +61,12 @@
 					<text class="item-arrow">›</text>
 				</view>
 			</view>
+			<view class="discover-section">
+				<view class="discover-item" @click="handleMBTI">
+					<text class="item-name">MBTI测试</text>
+					<text class="item-arrow">›</text>
+				</view>
+			</view>
 		</scroll-view>
 	</view>
 </template>
@@ -129,6 +135,10 @@
 
 	const handleDoNotBuy_AnAssistant = () => {
 		gotoPage("../../pages/DoNotBuy-AnAssistant/DoNotBuy-AnAssistant");
+	}
+
+	const handleMBTI = () => {
+		gotoPage("../../pages/acgti/acgti");
 	}
 
 	// 初始化系统信息
