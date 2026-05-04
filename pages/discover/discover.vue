@@ -138,8 +138,37 @@
 	}
 
 	const handleMBTI = () => {
-		gotoPage("../../pages/acgti/acgti");
-	}
+		const url = "https://acgti.tianxingleo.top/";
+		const cleanUrl = url.replace(/`/g, '').trim();
+
+		try {
+			// APP 打开外部浏览器
+			if (typeof plus !== 'undefined') {
+				plus.runtime.openURL(cleanUrl,
+					(res) => console.log('打开成功'),
+					(err) => {
+						uni.navigateTo({
+							url: `/pages/webview/webview?url=${encodeURIComponent(cleanUrl)}`
+						});
+					}
+				);
+			}
+			// H5 打开新标签
+			else if (typeof window !== 'undefined') {
+				window.open(cleanUrl, '_blank');
+			}
+			// 兜底
+			else {
+				uni.navigateTo({
+					url: `/pages/webview/webview?url=${encodeURIComponent(cleanUrl)}`
+				});
+			}
+		} catch (error) {
+			uni.navigateTo({
+				url: `/pages/webview/webview?url=${encodeURIComponent(cleanUrl)}`
+			});
+		}
+	};
 
 	// 初始化系统信息
 	const initSystemInfo = () => {
