@@ -13,6 +13,8 @@
 - **发现页面** - 音乐播放器、动漫浏览等娱乐功能
 - **个人主页** - 个人信息管理与设置
 - **音乐播放器** - 内置音乐播放功能及播放列表支持
+- **游戏模拟器** - 内置复古游戏模拟器，支持 NES、GB/GBC、GBA、SNES 等多种 ROM 格式，基于 [EmulatorJS](https://github.com/EmulatorJS/EmulatorJS)
+- **AI 购物助手** - 智能商品诊断工具，通过灵魂拷问和权重分析帮助用户做出购买决策
 - **跨平台支持** - 支持 H5、Android、iOS 等多平台运行
 
 ## 技术栈
@@ -49,6 +51,8 @@ Vheart-Chat/
 │   ├── profile/          # 个人主页
 │   ├── music-index/      # 音乐播放器
 │   ├── player/           # 全屏播放器
+│   ├── emulatorJs/        # 复古游戏模拟器
+│   ├── DoNotBuy-AnAssistant/  # AI 购物助手
 │   └── ...
 ├── static/               # 静态资源
 ├── uniCloud-alipay/      # 云函数

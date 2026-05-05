@@ -15,6 +15,8 @@ A full-stack cross-platform mobile application imitating WeChat, built with uni-
 - **Discover Feed** - Music player, anime browsing, and more entertainment features
 - **User Profile** - Personal information management and settings
 - **Music Player** - Built-in music playback with playlist support
+- **Game Emulator** - Built-in retro game emulator supporting various ROM formats (NES, GB/GBC, GBA, SNES, etc.), powered by [EmulatorJS](https://github.com/EmulatorJS/EmulatorJS)
+- **AI Shopping Assistant** - Intelligent product diagnosis tool that helps users make informed purchase decisions through soul-searching questions and weighted analysis
 - **Cross-Platform** - Runs on H5, Android, iOS, and other platforms
 
 ## Tech Stack
@@ -51,6 +53,8 @@ Vheart-Chat/
 │   ├── profile/          # Profile page
 │   ├── music-index/      # Music player
 │   ├── player/           # Full-screen player
+│   ├── emulatorJs/       # Retro game emulator
+│   ├── DoNotBuy-AnAssistant/  # AI shopping assistant
 │   └── ...
 ├── static/               # Static resources
 ├── uniCloud-alipay/      # Cloud functions
