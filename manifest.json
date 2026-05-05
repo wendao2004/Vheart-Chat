@@ -2,8 +2,8 @@
     "name" : "Vheart-Chat",
     "appid" : "__UNI__E101952",
     "description" : "基于vue+ts开发的仿微信跨端App",
-    "versionName" : "1.2.5",
-    "versionCode" : 125,
+    "versionName" : "1.2.6",
+    "versionCode" : 126,
     "transformPx" : false,
     /* 5+App特有相关 */
     "app-plus" : {

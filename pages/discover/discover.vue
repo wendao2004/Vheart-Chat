@@ -67,6 +67,12 @@
 					<text class="item-arrow">›</text>
 				</view>
 			</view>
+			<view class="discover-section">
+				<view class="discover-item" @click="handleEmulatorJs">
+					<text class="item-name">游戏机</text>
+					<text class="item-arrow">›</text>
+				</view>
+			</view>
 		</scroll-view>
 	</view>
 </template>
@@ -169,6 +175,11 @@
 			});
 		}
 	};
+
+	const handleEmulatorJs = () => {
+		gotoPage("../../pages/emulatorJs/emulatorJs");
+	}
+
 
 	// 初始化系统信息
 	const initSystemInfo = () => {
