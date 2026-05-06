@@ -29,9 +29,9 @@ var require_buffer = __commonJS({
   }
 });
 
-// ../../../../UGit/Vheart-Chat/node_modules/js-md5/src/md5.js
+// ../../../../UGit/Vheart-Chat-Github/Vheart-Chat/node_modules/js-md5/src/md5.js
 var require_md5 = __commonJS({
-  "../../../../UGit/Vheart-Chat/node_modules/js-md5/src/md5.js"(exports, module) {
+  "../../../../UGit/Vheart-Chat-Github/Vheart-Chat/node_modules/js-md5/src/md5.js"(exports, module) {
     (function() {
       "use strict";
       var INPUT_ERROR = "input is invalid type";
