@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音频播放桥接示例</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        .play-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .play-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        .pause-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        .pause-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(240, 147, 251, 0.4);
+        }
+        .stop-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        .stop-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(79, 172, 254, 0.4);
+        }
+        .info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            border-left: 4px solid #667eea;
+        }
+        .info h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .info p {
+            margin: 10px 0;
+            color: #666;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 音频播放桥接示例</h1>
+        
+        <div class="button-group">
+            <button class="play-btn" onclick="playSong1()">
+                🎶 播放歌曲1 (song01.mp3)
+            </button>
+            <button class="play-btn" onclick="playSong2()">
+                🎶 播放歌曲2 (song02.mp3)
+            </button>
+            <button class="pause-btn" onclick="pauseAudio()">
+                ⏸️ 暂停播放
+            </button>
+            <button class="stop-btn" onclick="stopAudio()">
+                ⏹️ 停止播放
+            </button>
+        </div>
+
+        <div class="info">
+            <h3>使用说明</h3>
+            <p>✅ 点击"播放"按钮将调用原生音乐播放器</p>
+            <p>✅ 支持后台播放,即使应用切换到后台也能继续播放</p>
+            <p>✅ 自动跳转到播放器页面,显示播放控制界面</p>
+            <p>⚠️ 此示例需要在uni-app打包的应用中运行</p>
+        </div>
+
+        <div class="status" id="status">
+            状态: 等待操作...
+        </div>
+    </div>
+
+    <script src="./native-bridge.js"></script>
+    <script>
+        function updateStatus(message) {
+            const statusEl = document.getElementById('status');
+            const timestamp = new Date().toLocaleTimeString();
+            statusEl.textContent = `[${timestamp}] ${message}`;
+            console.log(message);
+        }
+
+        function playSong1() {
+            updateStatus('正在请求播放歌曲1...');
+            if (window.nativeBridge) {
+                const success = window.nativeBridge.playAudio('audio/song01.mp3', '背景音乐1');
+                if (success) {
+                    updateStatus('✅ 已发送播放请求: song01.mp3');
+                } else {
+                    updateStatus('❌ 发送播放请求失败');
+                }
+            } else {
+                updateStatus('❌ nativeBridge 未初始化');
+            }
+        }
+
+        function playSong2() {
+            updateStatus('正在请求播放歌曲2...');
+            if (window.nativeBridge) {
+                const success = window.nativeBridge.playAudio('audio/song02.mp3', '背景音乐2');
+                if (success) {
+                    updateStatus('✅ 已发送播放请求: song02.mp3');
+                } else {
+                    updateStatus('❌ 发送播放请求失败');
+                }
+            } else {
+                updateStatus('❌ nativeBridge 未初始化');
+            }
+        }
+
+        function pauseAudio() {
+            updateStatus('正在请求暂停播放...');
+            if (window.nativeBridge) {
+                const success = window.nativeBridge.pauseAudio();
+                if (success) {
+                    updateStatus('✅ 已发送暂停请求');
+                } else {
+                    updateStatus('❌ 发送暂停请求失败');
+                }
+            } else {
+                updateStatus('❌ nativeBridge 未初始化');
+            }
+        }
+
+        function stopAudio() {
+            updateStatus('正在请求停止播放...');
+            if (window.nativeBridge) {
+                const success = window.nativeBridge.stopAudio();
+                if (success) {
+                    updateStatus('✅ 已发送停止请求');
+                } else {
+                    updateStatus('❌ 发送停止请求失败');
+                }
+            } else {
+                updateStatus('❌ nativeBridge 未初始化');
+            }
+        }
+
+        window.onload = function() {
+            if (window.nativeBridge) {
+                updateStatus('✅ NativeBridge 已初始化,可以开始使用');
+            } else {
+                updateStatus('⚠️ NativeBridge 未初始化,可能在非uni-app环境中');
+            }
+        };
+    </script>
+</body>
+</html>

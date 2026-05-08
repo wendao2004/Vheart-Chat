@@ -73,6 +73,12 @@
 					<text class="item-arrow">›</text>
 				</view>
 			</view>
+			<view class="discover-section">
+				<view class="discover-item" @click="handleCubeCity">
+					<text class="item-name">小小城市</text>
+					<text class="item-arrow">›</text>
+				</view>
+			</view>
 		</scroll-view>
 	</view>
 </template>
@@ -178,6 +184,9 @@
 
 	const handleEmulatorJs = () => {
 		gotoPage("../../pages/emulatorJs/emulatorJs");
+	}
+	const handleCubeCity = () => {
+		gotoPage("../../pages/cubeCity/cubeCity");
 	}
 
 

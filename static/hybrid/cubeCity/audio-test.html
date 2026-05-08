@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音频播放测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .test-item {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+        .test-item.error {
+            border-left-color: #f44336;
+        }
+        .test-item.success {
+            border-left-color: #4CAF50;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        audio {
+            width: 100%;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 音频播放测试</h1>
+        
+        <div class="test-item">
+            <h3>测试1: 使用相对路径播放音频</h3>
+            <p>路径: audio/song01.mp3</p>
+            <button onclick="testRelativePath1()">播放 song01.mp3</button>
+            <button onclick="testRelativePath2()">播放 song02.mp3</button>
+            <div class="status" id="status1">等待测试...</div>
+        </div>
+
+        <div class="test-item">
+            <h3>测试2: 使用绝对路径播放音频</h3>
+            <p>路径: /static/hybrid/cubeCity/audio/song01.mp3</p>
+            <button onclick="testAbsolutePath1()">播放 song01.mp3</button>
+            <button onclick="testAbsolutePath2()">播放 song02.mp3</button>
+            <div class="status" id="status2">等待测试...</div>
+        </div>
+
+        <div class="test-item">
+            <h3>测试3: 使用HTML5 Audio标签</h3>
+            <p>直接使用audio标签</p>
+            <audio id="audio1" controls>
+                <source src="audio/song01.mp3" type="audio/mpeg">
+                您的浏览器不支持 audio 标签。
+            </audio>
+            <audio id="audio2" controls>
+                <source src="audio/song02.mp3" type="audio/mpeg">
+                您的浏览器不支持 audio 标签。
+            </audio>
+            <div class="status" id="status3">等待测试...</div>
+        </div>
+
+        <div class="test-item">
+            <h3>测试4: 检查音频文件是否存在</h3>
+            <button onclick="checkAudioFiles()">检查音频文件</button>
+            <div class="status" id="status4">等待检查...</div>
+        </div>
+
+        <div class="test-item">
+            <h3>测试5: 使用fetch API加载音频</h3>
+            <button onclick="fetchAudio()">Fetch加载音频</button>
+            <div class="status" id="status5">等待测试...</div>
+        </div>
+    </div>
+
+    <script>
+        function updateStatus(elementId, message, isError = false) {
+            const statusEl = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            statusEl.textContent = `[${timestamp}] ${message}`;
+            statusEl.style.color = isError ? '#f44336' : '#4CAF50';
+            console.log(`[${elementId}] ${message}`);
+        }
+
+        function testRelativePath1() {
+            updateStatus('status1', '开始测试相对路径 song01.mp3...');
+            const audio = new Audio('audio/song01.mp3');
+            
+            audio.oncanplay = () => {
+                updateStatus('status1', '✅ 音频加载成功,可以播放');
+                audio.play().catch(err => {
+                    updateStatus('status1', `❌ 播放失败: ${err.message}`, true);
+                });
+            };
+            
+            audio.onerror = (e) => {
+                updateStatus('status1', `❌ 音频加载失败: ${e.type} - ${audio.error?.message || '未知错误'}`, true);
+            };
+            
+            audio.onplay = () => {
+                updateStatus('status1', '✅ 音频开始播放');
+            };
+        }
+
+        function testRelativePath2() {
+            updateStatus('status1', '开始测试相对路径 song02.mp3...');
+            const audio = new Audio('audio/song02.mp3');
+            
+            audio.oncanplay = () => {
+                updateStatus('status1', '✅ 音频加载成功,可以播放');
+                audio.play().catch(err => {
+                    updateStatus('status1', `❌ 播放失败: ${err.message}`, true);
+                });
+            };
+            
+            audio.onerror = (e) => {
+                updateStatus('status1', `❌ 音频加载失败: ${e.type} - ${audio.error?.message || '未知错误'}`, true);
+            };
+            
+            audio.onplay = () => {
+                updateStatus('status1', '✅ 音频开始播放');
+            };
+        }
+
+        function testAbsolutePath1() {
+            updateStatus('status2', '开始测试绝对路径 song01.mp3...');
+            const audio = new Audio('/static/hybrid/cubeCity/audio/song01.mp3');
+            
+            audio.oncanplay = () => {
+                updateStatus('status2', '✅ 音频加载成功,可以播放');
+                audio.play().catch(err => {
+                    updateStatus('status2', `❌ 播放失败: ${err.message}`, true);
+                });
+            };
+            
+            audio.onerror = (e) => {
+                updateStatus('status2', `❌ 音频加载失败: ${e.type} - ${audio.error?.message || '未知错误'}`, true);
+            };
+            
+            audio.onplay = () => {
+                updateStatus('status2', '✅ 音频开始播放');
+            };
+        }
+
+        function testAbsolutePath2() {
+            updateStatus('status2', '开始测试绝对路径 song02.mp3...');
+            const audio = new Audio('/static/hybrid/cubeCity/audio/song02.mp3');
+            
+            audio.oncanplay = () => {
+                updateStatus('status2', '✅ 音频加载成功,可以播放');
+                audio.play().catch(err => {
+                    updateStatus('status2', `❌ 播放失败: ${err.message}`, true);
+                });
+            };
+            
+            audio.onerror = (e) => {
+                updateStatus('status2', `❌ 音频加载失败: ${e.type} - ${audio.error?.message || '未知错误'}`, true);
+            };
+            
+            audio.onplay = () => {
+                updateStatus('status2', '✅ 音频开始播放');
+            };
+        }
+
+        function checkAudioFiles() {
+            updateStatus('status4', '开始检查音频文件...');
+            
+            const audioFiles = [
+                'audio/song01.mp3',
+                'audio/song02.mp3',
+                '/static/hybrid/cubeCity/audio/song01.mp3',
+                '/static/hybrid/cubeCity/audio/song02.mp3'
+            ];
+            
+            let results = [];
+            let completed = 0;
+            
+            audioFiles.forEach((file, index) => {
+                fetch(file, { method: 'HEAD' })
+                    .then(response => {
+                        if (response.ok) {
+                            results.push(`✅ ${file} - 存在 (${response.status})`);
+                        } else {
+                            results.push(`❌ ${file} - 不存在 (${response.status})`);
+                        }
+                        completed++;
+                        
+                        if (completed === audioFiles.length) {
+                            updateStatus('status4', results.join('\n'));
+                        }
+                    })
+                    .catch(err => {
+                        results.push(`❌ ${file} - 错误: ${err.message}`);
+                        completed++;
+                        
+                        if (completed === audioFiles.length) {
+                            updateStatus('status4', results.join('\n'));
+                        }
+                    });
+            });
+        }
+
+        function fetchAudio() {
+            updateStatus('status5', '开始使用fetch加载音频...');
+            
+            fetch('audio/song01.mp3')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    updateStatus('status5', `✅ 音频文件加载成功, 大小: ${blob.size} bytes, 类型: ${blob.type}`);
+                    
+                    const url = URL.createObjectURL(blob);
+                    const audio = new Audio(url);
+                    
+                    audio.oncanplay = () => {
+                        updateStatus('status5', '✅ 音频准备就绪,开始播放');
+                        audio.play().catch(err => {
+                            updateStatus('status5', `❌ 播放失败: ${err.message}`, true);
+                        });
+                    };
+                    
+                    audio.onerror = (e) => {
+                        updateStatus('status5', `❌ 音频播放失败: ${e.type}`, true);
+                    };
+                })
+                .catch(err => {
+                    updateStatus('status5', `❌ Fetch失败: ${err.message}`, true);
+                });
+        }
+
+        document.getElementById('audio1').onerror = (e) => {
+            updateStatus('status3', `❌ Audio标签1加载失败: ${e.type}`, true);
+        };
+
+        document.getElementById('audio2').onerror = (e) => {
+            updateStatus('status3', `❌ Audio标签2加载失败: ${e.type}`, true);
+        };
+
+        document.getElementById('audio1').oncanplay = () => {
+            updateStatus('status3', '✅ Audio标签1加载成功');
+        };
+
+        document.getElementById('audio2').oncanplay = () => {
+            updateStatus('status3', '✅ Audio标签2加载成功');
+        };
+    </script>
+</body>
+</html>
