@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>小小城市</title>
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <link rel="manifest" href="/app.webmanifest" />
+  <link rel="icon" sizes="192x192" href="/favicon/favicon-192.webp" />
+  <link rel="icon" sizes="512x512" href="/favicon/favicon-512.webp" />
+  <link rel="preconnect" href="https://env-00jy622npuwq.normal.cloudstatic.cn" crossorigin />
+
+  <script src="./three-patch.js"></script>
+  <script src="./fps-monitor.js"></script>
+  <script src="./model-patch.js"></script>
+  <script src="./preload-manager.js"></script>
+
+  <script type="module" crossorigin src="./assets/index-BleE4TrB.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-ChzZD8Y-.css">
+  <script type="module">import.meta.url;import("_").catch(()=>1);(async function*(){})().next();if(location.protocol!="file:"){window.__vite_is_modern_browser=true}</script>
+  <script type="module">!function(){if(window.__vite_is_modern_browser)return;console.warn("vite: loading legacy chunks, syntax error above and the same error below should be ignored");var e=document.getElementById("vite-legacy-polyfill"),n=document.createElement("script");n.src=e.src,n.onload=function(){System.import(document.getElementById('vite-legacy-entry').getAttribute('data-src'))},document.body.appendChild(n)}();</script>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #6990b8;
+    }
+    #app {
+      width: 100%;
+      height: 100%;
+    }
+    canvas {
+      image-rendering: optimizeSpeed;
+    }
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #3b5279;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    #loading-screen.hidden {
+      display: none;
+    }
+    #loading-title {
+      font-size: 24px;
+      font-weight: bold;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+    #loading-bar {
+      width: 280px;
+      height: 10px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+    #loading-fill {
+      height: 100%;
+      width: 0%;
+      background: #4CAF50;
+      border-radius: 5px;
+      transition: width 0.3s;
+    }
+    #loading-count {
+      font-size: 14px;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 8px;
+    }
+    #loading-text {
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+    }
+    #fps-display {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.5);
+      color: #4CAF50;
+      padding: 5px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      z-index: 1000;
+    }
+    #perf-toggle {
+      position: fixed;
+      bottom: 15px;
+      right: 15px;
+      width: 35px;
+      height: 35px;
+      background: rgba(0,0,0,0.5);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      font-size: 16px;
+      cursor: pointer;
+      z-index: 1000;
+    }
+    #perf-menu {
+      position: fixed;
+      bottom: 55px;
+      right: 15px;
+      background: rgba(0,0,0,0.85);
+      border-radius: 10px;
+      padding: 8px;
+      z-index: 1000;
+      display: none;
+    }
+    #perf-menu.show {
+      display: block;
+    }
+    .perf-btn {
+      display: block;
+      width: 100%;
+      background: none;
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      font-size: 12px;
+      text-align: left;
+      cursor: pointer;
+    }
+    .perf-btn.active {
+      color: #4CAF50;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="loading-screen">
+    <div id="loading-title">小小城市</div>
+    <div id="loading-bar">
+      <div id="loading-fill"></div>
+    </div>
+    <div id="loading-count">0 / 34</div>
+    <div id="loading-text">正在加载资源...</div>
+  </div>
+
+  <div id="app"></div>
+
+  <div id="fps-display">FPS: --</div>
+  <button id="perf-toggle" onclick="togglePerfMenu()">⚡</button>
+  <div id="perf-menu">
+    <button class="perf-btn" onclick="setPerfMode('low')">🔰 低配</button>
+    <button class="perf-btn active" onclick="setPerfMode('medium')">⚡ 均衡</button>
+    <button class="perf-btn" onclick="setPerfMode('high')">🚀 高性能</button>
+    <button class="perf-btn" onclick="setPerfMode('ultra')">💀 极限</button>
+  </div>
+
+  <script>
+    var menuVisible = false;
+    var loadedCount = 0;
+    var totalCount = 34;
+
+    function togglePerfMenu() {
+      menuVisible = !menuVisible;
+      document.getElementById('perf-menu').classList.toggle('show', menuVisible);
+    }
+
+    function setPerfMode(mode) {
+      if (window.__setPerformanceMode) window.__setPerformanceMode(mode);
+      document.querySelectorAll('.perf-btn').forEach(function(b) { b.classList.remove('active'); });
+      event.target.classList.add('active');
+      document.getElementById('perf-menu').classList.remove('show');
+      menuVisible = false;
+    }
+
+    function updateFPS() {
+      var fps = window.__getFPS ? window.__getFPS() : 0;
+      document.getElementById('fps-display').textContent = 'FPS: ' + (fps || '--');
+      requestAnimationFrame(updateFPS);
+    }
+    updateFPS();
+
+    window.__hideLoading = function() {
+      document.getElementById('loading-screen').classList.add('hidden');
+    };
+
+    window.__setLoadingProgress = function(p, text) {
+      document.getElementById('loading-fill').style.width = p + '%';
+      if (text) document.getElementById('loading-text').textContent = text;
+    };
+
+    window.__onModelLoaded = function(name) {
+      loadedCount++;
+      document.getElementById('loading-count').textContent = loadedCount + ' / ' + totalCount;
+      document.getElementById('loading-text').textContent = '已加载: ' + name;
+    };
+
+    window.__setTotalModels = function(total) {
+      totalCount = total;
+      document.getElementById('loading-count').textContent = loadedCount + ' / ' + totalCount;
+    };
+
+    function startPreload() {
+      if (window.preloadManager) {
+        console.log('[LOADER] 开始预加载资源...');
+        window.preloadManager.on('progress', function(data) {
+          console.log('[LOADER] 进度:', data.progress + '%');
+        });
+        window.preloadManager.on('complete', function(data) {
+          console.log('[LOADER] 预加载完成:', data.loaded, '/', data.total);
+          window.__hideLoading();
+        });
+        window.preloadManager.start();
+      } else {
+        console.warn('[LOADER] 预加载管理器未找到');
+      }
+    }
+
+    window.addEventListener('load', function() {
+      startPreload();
+    });
+  </script>
+
+  <script nomodule>!function(){var e=document,t=e.createElement("script");if(!("noModule"in t)&&"onbeforeload"in t){var n=!1;e.addEventListener("beforeload",(function(e){if(e.target===t)n=!0;else if(!e.target.hasAttribute("nomodule")||!n)return;e.preventDefault()}),!0),t.type="module",t.src=".",e.head.appendChild(t),t.remove()}}();</script>
+  <script nomodule crossorigin id="vite-legacy-polyfill" src="./assets/polyfills-legacy-D7DzWZFZ.js"></script>
+  <script nomodule crossorigin id="vite-legacy-entry" data-src="./assets/index-legacy-BejyO5vi.js">System.import(document.getElementById('vite-legacy-entry').getAttribute('data-src'))</script>
+</body>
+
+</html>
