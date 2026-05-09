@@ -101,9 +101,18 @@ const onWebViewLoad = () => {
 };
 
 const handleMessage = (e) => {
-    console.log('收到H5消息:', e.detail.data);
+    console.log('收到H5消息:', JSON.stringify(e.detail));
 
-    const data = e.detail.data[0];
+    let data = null;
+    if (e.detail && e.detail.data) {
+        if (Array.isArray(e.detail.data) && e.detail.data.length > 0) {
+            data = e.detail.data[0];
+        } else if (typeof e.detail.data === 'object') {
+            data = e.detail.data;
+        }
+    }
+
+    console.log('解析后的数据:', JSON.stringify(data));
 
     if (data && data.action === 'modelLoaded') {
         handleModelLoaded(data.modelName);
@@ -112,6 +121,20 @@ const handleMessage = (e) => {
     } else if (data && data.action === 'gameReady') {
         hideLoading();
         console.log('游戏已准备就绪！');
+    } else if (data && data.action === 'playBackgroundMusic') {
+        console.log('收到播放背景音乐请求');
+        playBackgroundMusic();
+    } else if (data && data.action === 'pauseBackgroundMusic') {
+        console.log('收到暂停背景音乐请求');
+        pauseMusic();
+    } else if (data && data.action === 'playAudio') {
+        console.log('收到播放音频请求:', data.src);
+        playAudio(data.src);
+    } else if (data && data.action === 'pauseAudio') {
+        console.log('收到暂停音频请求');
+        pauseMusic();
+    } else {
+        console.log('未知消息类型:', data ? data.action : 'no action');
     }
 };
 
@@ -188,21 +211,106 @@ const sendModelUrlsToWebView = () => {
 };
 
 const playBackgroundMusic = () => {
+    console.log('playBackgroundMusic 调用');
+    
     if (innerAudioContext.value) {
         try {
             innerAudioContext.value.destroy();
+            console.log('已销毁旧音频上下文');
         } catch (e) {
             console.error('销毁旧音频上下文失败:', e);
         }
     }
 
+    console.log('创建新音频上下文');
     innerAudioContext.value = uni.createInnerAudioContext();
+    console.log('音频上下文创建成功:', !!innerAudioContext.value);
+    
     innerAudioContext.value.src = cloudAudioUrls[0];
+    console.log('音频URL:', cloudAudioUrls[0]);
+    
+    innerAudioContext.value.loop = true;
+    innerAudioContext.value.volume = 0.5;
+    console.log('音频参数设置完成: loop=true, volume=0.5');
+
+    innerAudioContext.value.onCanplay(() => {
+        console.log('音频准备就绪 - onCanplay 回调触发');
+        innerAudioContext.value.play().then(() => {
+            console.log('play() 调用成功');
+        }).catch(err => {
+            console.error('播放失败:', err);
+            console.error('播放失败详情:', JSON.stringify(err));
+        });
+    });
+
+    innerAudioContext.value.onPlay(() => {
+        console.log('音频开始播放 - onPlay 回调触发');
+        isPlaying.value = true;
+        console.log('isPlaying 状态:', isPlaying.value);
+    });
+
+    innerAudioContext.value.onEnded(() => {
+        console.log('音频播放结束');
+    });
+
+    innerAudioContext.value.onError((err) => {
+        console.error('音频播放错误:', err);
+        console.error('错误详情:', JSON.stringify(err));
+        isPlaying.value = false;
+    });
+
+    innerAudioContext.value.onLoad(() => {
+        console.log('音频加载完成 - onLoad 回调触发');
+    });
+
+    innerAudioContext.value.onWaiting(() => {
+        console.log('音频等待中');
+    });
+
+    innerAudioContext.value.load();
+    console.log('已调用 load()');
+};
+
+const playAudio = (src) => {
+    console.log('playAudio 调用, src:', src);
+    
+    if (!src) {
+        console.warn('playAudio: src为空');
+        return;
+    }
+
+    let audioUrl = src;
+    if (src.startsWith('/audio/')) {
+        const filename = src.split('/').pop();
+        console.log('playAudio: 相对路径转换, filename:', filename);
+        if (filename === 'song01.mp3') {
+            audioUrl = cloudAudioUrls[0];
+        } else if (filename === 'song02.mp3') {
+            audioUrl = cloudAudioUrls[1];
+        } else {
+            audioUrl = 'https://env-00jy622npuwq.normal.cloudstatic.cn/CubeCity/audio/' + filename;
+        }
+    }
+
+    console.log('playAudio: 最终URL:', audioUrl);
+
+    if (innerAudioContext.value) {
+        try {
+            innerAudioContext.value.destroy();
+            console.log('playAudio: 已销毁旧音频上下文');
+        } catch (e) {
+            console.error('销毁旧音频上下文失败:', e);
+        }
+    }
+
+    console.log('playAudio: 创建新音频上下文');
+    innerAudioContext.value = uni.createInnerAudioContext();
+    innerAudioContext.value.src = audioUrl;
     innerAudioContext.value.loop = true;
     innerAudioContext.value.volume = 0.5;
 
     innerAudioContext.value.onCanplay(() => {
-        console.log('音频准备就绪');
+        console.log('音频准备就绪:', audioUrl);
         innerAudioContext.value.play().catch(err => {
             console.error('播放失败:', err);
         });
@@ -213,11 +321,27 @@ const playBackgroundMusic = () => {
         isPlaying.value = true;
     });
 
+    innerAudioContext.value.onEnded(() => {
+        console.log('音频播放结束，循环播放');
+        if (innerAudioContext.value) {
+            innerAudioContext.value.play().catch(err => {
+                console.error('循环播放失败:', err);
+            });
+        }
+    });
+
     innerAudioContext.value.onError((err) => {
         console.error('音频播放错误:', err);
+        console.error('错误详情:', JSON.stringify(err));
+        isPlaying.value = false;
+    });
+
+    innerAudioContext.value.onLoad(() => {
+        console.log('音频加载完成');
     });
 
     innerAudioContext.value.load();
+    console.log('playAudio: 已调用 load()');
 };
 
 const pauseMusic = () => {

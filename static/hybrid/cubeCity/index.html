@@ -11,6 +11,245 @@
   <link rel="icon" sizes="512x512" href="/favicon/favicon-512.webp" />
   <link rel="preconnect" href="https://env-00jy622npuwq.normal.cloudstatic.cn" crossorigin />
 
+  <script>
+    (function() {
+      console.log('[AUDIO PATCH] 开始注入音频播放拦截器...');
+      
+      window.__audioQueue = [];
+      window.__audioInitialized = false;
+      window.__innerAudioContexts = [];
+      
+      window.uni = window.uni || {};
+      window.uni.createInnerAudioContext = function() {
+        console.log('[AUDIO PATCH] 拦截 uni.createInnerAudioContext()');
+        
+        var context = {
+          src: '',
+          autoplay: false,
+          loop: false,
+          volume: 1,
+          duration: 0,
+          currentTime: 0,
+          paused: true,
+          onCanplay: function() {},
+          onPlay: function() {},
+          onPause: function() {},
+          onStop: function() {},
+          onEnded: function() {},
+          onError: function() {},
+          onLoad: function() {},
+          onWaiting: function() {},
+          
+          play: function() {
+            console.log('[AUDIO PATCH] uni audio play(), src:', context.src);
+            return new Promise(function(resolve, reject) {
+              if (window.__audioInitialized) {
+                var success = sendAudioMessage('playAudio', context.src);
+                if (success) {
+                  context.paused = false;
+                  if (typeof context.onPlay === 'function') {
+                    setTimeout(context.onPlay, 100);
+                  }
+                  resolve();
+                } else {
+                  reject(new Error('No postMessage interface'));
+                }
+              } else {
+                reject(new Error('Audio bridge not initialized'));
+              }
+            });
+          },
+          
+          pause: function() {
+            console.log('[AUDIO PATCH] uni audio pause()');
+            if (window.__audioInitialized) {
+              sendAudioMessage('pauseAudio');
+            }
+            context.paused = true;
+            if (typeof context.onPause === 'function') {
+              context.onPause();
+            }
+          },
+          
+          stop: function() {
+            console.log('[AUDIO PATCH] uni audio stop()');
+            if (window.__audioInitialized) {
+              sendAudioMessage('stopAudio');
+            }
+            context.paused = true;
+            context.currentTime = 0;
+            if (typeof context.onStop === 'function') {
+              context.onStop();
+            }
+          },
+          
+          seek: function(time) {
+            console.log('[AUDIO PATCH] uni audio seek:', time);
+            context.currentTime = time;
+          },
+          
+          load: function() {
+            console.log('[AUDIO PATCH] uni audio load(), src:', context.src);
+            if (typeof context.onLoad === 'function') {
+              setTimeout(context.onLoad, 100);
+            }
+            if (typeof context.onCanplay === 'function') {
+              setTimeout(context.onCanplay, 200);
+            }
+          },
+          
+          destroy: function() {
+            console.log('[AUDIO PATCH] uni audio destroy()');
+            var index = window.__innerAudioContexts.indexOf(context);
+            if (index > -1) {
+              window.__innerAudioContexts.splice(index, 1);
+            }
+          }
+        };
+        
+        window.__innerAudioContexts.push(context);
+        return context;
+      };
+      
+      var originalAudioPlay = HTMLAudioElement.prototype.play;
+      var originalAudioConstructor = window.Audio;
+      
+      function sendToUniApp(message) {
+        console.log('[AUDIO PATCH] 尝试发送消息到 uni-app:', message.action);
+        
+        if (typeof uni !== 'undefined' && typeof uni.postMessage === 'function') {
+          console.log('[AUDIO PATCH] 使用 uni.postMessage');
+          uni.postMessage({ data: message });
+          return true;
+        } else if (window.ReactNativeWebView) {
+          console.log('[AUDIO PATCH] 使用 ReactNativeWebView.postMessage');
+          window.ReactNativeWebView.postMessage(JSON.stringify(message));
+          return true;
+        } else if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.postMessage) {
+          console.log('[AUDIO PATCH] 使用 webkit.messageHandlers.postMessage');
+          window.webkit.messageHandlers.postMessage.postMessage(message);
+          return true;
+        } else if (window.parent && window.parent.postMessage) {
+          console.log('[AUDIO PATCH] 使用 window.parent.postMessage');
+          window.parent.postMessage(message, '*');
+          return true;
+        } else {
+          console.warn('[AUDIO PATCH] 未找到可用的 postMessage 接口');
+          return false;
+        }
+      }
+      
+      function sendAudioMessage(action, src) {
+        var message = {
+          action: action,
+          src: src || '',
+          timestamp: Date.now()
+        };
+        return sendToUniApp(message);
+      }
+      
+      window.Audio = function(src) {
+        console.log('[AUDIO PATCH] 拦截 Audio 构造函数, src:', src);
+        var audio = new originalAudioConstructor(src);
+        
+        audio._originalPlay = audio.play.bind(audio);
+        audio.play = function() {
+          console.log('[AUDIO PATCH] 拦截 audio.play() 调用, src:', audio.src, ', initialized:', window.__audioInitialized);
+          
+          if (window.__audioInitialized) {
+            var success = sendToUniApp({
+              action: 'playAudio',
+              src: audio.src,
+              timestamp: Date.now()
+            });
+            if (success) {
+              return Promise.resolve();
+            }
+          }
+          
+          console.log('[AUDIO PATCH] 回退到原生播放');
+          window.__audioQueue.push({ type: 'play', audio: audio });
+          return originalAudioPlay.call(audio);
+        };
+        
+        audio._originalPause = audio.pause.bind(audio);
+        audio.pause = function() {
+          console.log('[AUDIO PATCH] 拦截 audio.pause() 调用');
+          
+          if (window.__audioInitialized) {
+            sendToUniApp({
+              action: 'pauseAudio',
+              timestamp: Date.now()
+            });
+          }
+          return audio._originalPause();
+        };
+        
+        return audio;
+      };
+      
+      HTMLAudioElement.prototype.play = function() {
+        console.log('[AUDIO PATCH] 拦截 HTMLAudioElement.prototype.play(), src:', this.src, ', initialized:', window.__audioInitialized);
+        
+        if (window.__audioInitialized) {
+          var success = sendToUniApp({
+            action: 'playAudio',
+            src: this.src,
+            timestamp: Date.now()
+          });
+          if (success) {
+            console.log('[AUDIO PATCH] 播放请求已发送到 uni-app');
+            return Promise.resolve();
+          }
+        }
+        
+        console.log('[AUDIO PATCH] 回退到原生播放');
+        return originalAudioPlay.call(this);
+      };
+      
+      if (window.Audio && window.Audio.prototype) {
+        var originalAudioProtoPlay = window.Audio.prototype.play;
+        window.Audio.prototype.play = function() {
+          console.log('[AUDIO PATCH] 拦截 Audio.prototype.play(), src:', this.src, ', initialized:', window.__audioInitialized);
+          
+          if (window.__audioInitialized) {
+            var success = sendToUniApp({
+              action: 'playAudio',
+              src: this.src,
+              timestamp: Date.now()
+            });
+            if (success) {
+              console.log('[AUDIO PATCH] 播放请求已发送到 uni-app');
+              return Promise.resolve();
+            }
+          }
+          
+          console.log('[AUDIO PATCH] 回退到原生播放');
+          return originalAudioProtoPlay.call(this);
+        };
+      }
+      
+      window.__initAudioBridge = function() {
+        console.log('[AUDIO PATCH] 初始化音频桥接');
+        window.__audioInitialized = true;
+        
+        console.log('[AUDIO PATCH] 队列长度:', window.__audioQueue.length);
+        while (window.__audioQueue.length > 0) {
+          var item = window.__audioQueue.shift();
+          console.log('[AUDIO PATCH] 处理队列中的播放请求:', item.audio ? item.audio.src : 'unknown');
+          sendToUniApp({
+            action: 'playAudio',
+            src: item.audio ? item.audio.src : '',
+            timestamp: Date.now()
+          });
+        }
+      };
+      
+      console.log('[AUDIO PATCH] 音频播放拦截器注入完成');
+      console.log('[AUDIO PATCH] ReactNativeWebView 存在:', !!window.ReactNativeWebView);
+      console.log('[AUDIO PATCH] webkit.messageHandlers 存在:', !!window.webkit?.messageHandlers);
+    })();
+  </script>
   <script src="./three-patch.js"></script>
   <script src="./fps-monitor.js"></script>
   <script src="./model-patch.js"></script>
@@ -223,6 +462,55 @@
 
     window.addEventListener('load', function() {
       startPreload();
+      
+      setTimeout(function() {
+        if (typeof window.__initAudioBridge === 'function') {
+          window.__initAudioBridge();
+        }
+      }, 500);
+    });
+
+    window.__playBackgroundMusic = function() {
+      console.log('[AUDIO] 请求 uni-app 播放背景音乐');
+      if (window.ReactNativeWebView) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({
+          action: 'playBackgroundMusic',
+          timestamp: Date.now()
+        }));
+      } else if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.postMessage) {
+        window.webkit.messageHandlers.postMessage.postMessage({
+          action: 'playBackgroundMusic',
+          timestamp: Date.now()
+        });
+      } else {
+        console.warn('[AUDIO] 未找到合适的 postMessage 接口');
+      }
+    };
+
+    window.__pauseBackgroundMusic = function() {
+      console.log('[AUDIO] 请求 uni-app 暂停背景音乐');
+      if (window.ReactNativeWebView) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({
+          action: 'pauseBackgroundMusic',
+          timestamp: Date.now()
+        }));
+      } else if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.postMessage) {
+        window.webkit.messageHandlers.postMessage.postMessage({
+          action: 'pauseBackgroundMusic',
+          timestamp: Date.now()
+        });
+      }
+    };
+
+    window.addEventListener('message', function(event) {
+      try {
+        var data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        if (data && data.action) {
+          console.log('[H5] 收到消息:', data.action);
+        }
+      } catch (e) {
+        console.error('[H5] 解析消息失败:', e);
+      }
     });
   </script>
 
